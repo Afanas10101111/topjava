@@ -60,8 +60,8 @@ public class UserMealsUtil {
         List<UserMealWithExcess> mealsWithExcess = new ArrayList<>(meals.size());
         for (UserMeal meal : meals) {
             LocalDateTime mealDateTime = meal.getDateTime();
-            UserMealWithExcess.CaloriesPerDayAccumulator accumulator;
-            if ((accumulator = caloriesPerDateMap.get(mealDateTime.toLocalDate())) == null) {
+            UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.get(mealDateTime.toLocalDate());
+            if (accumulator == null) {
                 accumulator = new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay);
                 caloriesPerDateMap.put(mealDateTime.toLocalDate(), accumulator);
             }

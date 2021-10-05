@@ -7,11 +7,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class UserMealsUtil {
@@ -32,6 +34,8 @@ public class UserMealsUtil {
         System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
 
         System.out.println(filteredByCyclesOptional2(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
+
+        System.out.println(filteredByStreamsWithCustomCollector(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -90,5 +94,40 @@ public class UserMealsUtil {
                         caloriesPerDateMap.get(m.getDateTime().toLocalDate()) > caloriesPerDay
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public static List<UserMealWithExcess> filteredByStreamsWithCustomCollector(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        return meals.stream()
+                .collect(getUserMealsWithExcessCollector(startTime, endTime, caloriesPerDay));
+    }
+
+    private static Collector<UserMeal, AbstractMap.SimpleImmutableEntry<HashMap<LocalDate, UserMealWithExcess.CaloriesPerDayAccumulator>, ArrayList<UserMealWithExcess>>, List<UserMealWithExcess>> getUserMealsWithExcessCollector(LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        return Collector.of(
+                () -> new AbstractMap.SimpleImmutableEntry<>(new HashMap<>(), new ArrayList<>()),
+                (supplier, meal) -> {
+                    LocalDateTime mealDateTime = meal.getDateTime();
+                    HashMap<LocalDate, UserMealWithExcess.CaloriesPerDayAccumulator> caloriesPerDateMap = supplier.getKey();
+                    UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.get(mealDateTime.toLocalDate());
+                    if (accumulator == null) {
+                        accumulator = new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay);
+                        caloriesPerDateMap.put(mealDateTime.toLocalDate(), accumulator);
+                    }
+                    accumulator.addCalories(meal.getCalories());
+                    if (TimeUtil.isBetweenHalfOpen(mealDateTime.toLocalTime(), startTime, endTime)) {
+                        supplier.getValue().add(new UserMealWithExcess(
+                                mealDateTime,
+                                meal.getDescription(),
+                                meal.getCalories(),
+                                accumulator
+                        ));
+                    }
+                },
+                (first, second) -> {
+                    first.getKey().putAll(second.getKey());
+                    first.getValue().addAll(second.getValue());
+                    return first;
+                },
+                AbstractMap.SimpleImmutableEntry::getValue
+        );
     }
 }

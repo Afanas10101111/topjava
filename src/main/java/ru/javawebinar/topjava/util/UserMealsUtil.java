@@ -50,12 +50,7 @@ public class UserMealsUtil {
         for (UserMeal meal : meals) {
             LocalDateTime mealDateTime = meal.getDateTime();
             if (TimeUtil.isBetweenHalfOpen(mealDateTime.toLocalTime(), startTime, endTime)) {
-                mealsWithExcess.add(new UserMealWithExcess(
-                        mealDateTime,
-                        meal.getDescription(),
-                        meal.getCalories(),
-                        caloriesPerDateMap.get(mealDateTime.toLocalDate()) > caloriesPerDay
-                ));
+                mealsWithExcess.add(mealTo(meal, caloriesPerDateMap.get(mealDateTime.toLocalDate()) > caloriesPerDay));
             }
         }
         return mealsWithExcess;
@@ -66,19 +61,13 @@ public class UserMealsUtil {
         List<UserMealWithExcess> mealsWithExcess = new ArrayList<>(meals.size());
         for (UserMeal meal : meals) {
             LocalDateTime mealDateTime = meal.getDateTime();
-            UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.get(mealDateTime.toLocalDate());
-            if (accumulator == null) {
-                accumulator = new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay);
-                caloriesPerDateMap.put(mealDateTime.toLocalDate(), accumulator);
-            }
+            UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.computeIfAbsent(
+                    mealDateTime.toLocalDate(),
+                    d -> new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay)
+            );
             accumulator.addCalories(meal.getCalories());
             if (TimeUtil.isBetweenHalfOpen(mealDateTime.toLocalTime(), startTime, endTime)) {
-                mealsWithExcess.add(new UserMealWithExcess(
-                        mealDateTime,
-                        meal.getDescription(),
-                        meal.getCalories(),
-                        accumulator
-                ));
+                mealsWithExcess.add(mealToWithAccumulator(meal, accumulator));
             }
         }
         return mealsWithExcess;
@@ -89,12 +78,7 @@ public class UserMealsUtil {
                 .collect(Collectors.toMap(m -> m.getDateTime().toLocalDate(), UserMeal::getCalories, Integer::sum));
         return meals.stream()
                 .filter(m -> TimeUtil.isBetweenHalfOpen(m.getDateTime().toLocalTime(), startTime, endTime))
-                .map(m -> new UserMealWithExcess(
-                        m.getDateTime(),
-                        m.getDescription(),
-                        m.getCalories(),
-                        caloriesPerDateMap.get(m.getDateTime().toLocalDate()) > caloriesPerDay
-                ))
+                .map(m -> mealTo(m, caloriesPerDateMap.get(m.getDateTime().toLocalDate()) > caloriesPerDay))
                 .collect(Collectors.toList());
     }
 
@@ -114,19 +98,13 @@ public class UserMealsUtil {
                 (supplier, meal) -> {
                     LocalDateTime mealDateTime = meal.getDateTime();
                     HashMap<LocalDate, UserMealWithExcess.CaloriesPerDayAccumulator> caloriesPerDateMap = supplier.getKey();
-                    UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.get(mealDateTime.toLocalDate());
-                    if (accumulator == null) {
-                        accumulator = new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay);
-                        caloriesPerDateMap.put(mealDateTime.toLocalDate(), accumulator);
-                    }
+                    UserMealWithExcess.CaloriesPerDayAccumulator accumulator = caloriesPerDateMap.computeIfAbsent(
+                            mealDateTime.toLocalDate(),
+                            d -> new UserMealWithExcess.CaloriesPerDayAccumulator(caloriesPerDay)
+                    );
                     accumulator.addCalories(meal.getCalories());
                     if (TimeUtil.isBetweenHalfOpen(mealDateTime.toLocalTime(), startTime, endTime)) {
-                        supplier.getValue().add(new UserMealWithExcess(
-                                mealDateTime,
-                                meal.getDescription(),
-                                meal.getCalories(),
-                                accumulator
-                        ));
+                        supplier.getValue().add(mealToWithAccumulator(meal, accumulator));
                     }
                 },
                 (first, second) -> {
@@ -155,13 +133,16 @@ public class UserMealsUtil {
                     return first;
                 },
                 supplier -> supplier.getValue().stream()
-                        .map(m -> new UserMealWithExcess(
-                                m.getDateTime(),
-                                m.getDescription(),
-                                m.getCalories(),
-                                supplier.getKey().get(m.getDateTime().toLocalDate()) > caloriesPerDay
-                        ))
+                        .map(m -> mealTo(m, supplier.getKey().get(m.getDateTime().toLocalDate()) > caloriesPerDay))
                         .collect(Collectors.toList())
         );
+    }
+
+    private static UserMealWithExcess mealTo(UserMeal userMeal, boolean excess) {
+        return new UserMealWithExcess(userMeal.getDateTime(),userMeal.getDescription(), userMeal.getCalories(), excess);
+    }
+
+    private static UserMealWithExcess mealToWithAccumulator(UserMeal userMeal, UserMealWithExcess.CaloriesPerDayAccumulator accumulator) {
+        return new UserMealWithExcess(userMeal.getDateTime(),userMeal.getDescription(), userMeal.getCalories(), accumulator);
     }
 }

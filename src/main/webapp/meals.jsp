@@ -18,18 +18,22 @@
 <h3><a href="index.html">Home</a></h3>
 <hr>
 <h2>Meals</h2>
+<h4><a href="meals?action=add">Add Meal</a></h4>
 <table>
     <tr>
         <th>Date</th>
         <th>Description</th>
         <th>Calories</th>
+        <th></th>
+        <th></th>
     </tr>
     <c:forEach var="meal" items="${mealsTo}">
-        <c:set var="mealColor" value="${meal.excess ? 'red' : 'green'}"/>
-        <tr style="color:${mealColor}">
+        <tr style="color:${meal.excess ? 'red' : 'green'}">
             <th><t:format value="${meal.dateTime}" pattern="yyyy-MM-dd hh:mm"/></th>
             <th>${meal.description}</th>
             <th>${meal.calories}</th>
+            <th><a href="meals?action=update&id=${meal.id}">Update</a></th>
+            <th><a href="meals?action=delete&id=${meal.id}">Delete</a></th>
         </tr>
     </c:forEach>
 </table>

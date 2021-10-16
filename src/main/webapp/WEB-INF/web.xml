@@ -26,14 +26,4 @@
         <url-pattern>/meals</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>mealServletWithRepoOperations</servlet-name>
-        <servlet-class>ru.javawebinar.topjava.web.MealServletWithRepoOperations</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>mealServletWithRepoOperations</servlet-name>
-        <url-pattern>/extended-meals</url-pattern>
-    </servlet-mapping>
-
 </web-app>

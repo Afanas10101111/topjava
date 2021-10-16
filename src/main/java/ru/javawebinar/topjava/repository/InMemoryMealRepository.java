@@ -36,8 +36,15 @@ public class InMemoryMealRepository implements MealRepository {
         Long id = meal.getId();
         if (id == null) {
             meal.setId(id = counter.getAndIncrement());
+            repository.put(id, meal);
+        } else {
+            Meal mealFromRepo = getById(id);
+            if (mealFromRepo == null) {
+                repository.put(id, meal);
+            } else {
+                meal = mealFromRepo;
+            }
         }
-        repository.put(id, meal);
         return meal;
     }
 

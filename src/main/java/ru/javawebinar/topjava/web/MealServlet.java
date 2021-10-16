@@ -29,8 +29,7 @@ public class MealServlet extends HttpServlet {
     private MealRepository repository;
 
     @Override
-    public void init() throws ServletException {
-        super.init();
+    public void init() {
         log = getLogger(MealServlet.class);
         repository = new InMemoryMealRepository();
     }
@@ -67,7 +66,7 @@ public class MealServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
-        Long mealId = id.length() == 0 ? null : Long.parseLong(id);
+        Long mealId = id.isEmpty() ? null : Long.parseLong(id);
         LocalDateTime dateTime = LocalDateTime.parse(request.getParameter("dateTime"));
         String description = request.getParameter("description");
         int calories = Integer.parseInt(request.getParameter("calories"));

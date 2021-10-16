@@ -21,8 +21,7 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         List<MealTo> mealsTo = MealsUtil.withoutFilter(MEALS, CALORIES_DAY_LIMIT);
-        log.debug("mealsTo size = {}", mealsTo.size());
-        
+        log.debug("doGet -> mealsTo size = {}", mealsTo.size());
         request.setAttribute("mealsTo", mealsTo);
         request.getRequestDispatcher("meals.jsp").forward(request, response);
     }

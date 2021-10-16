@@ -1,6 +1,8 @@
 package ru.javawebinar.topjava.config;
 
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.repository.IMealRepository;
+import ru.javawebinar.topjava.repository.InMemoryMealRepository;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -18,4 +20,9 @@ public class ProjectConstantsHolder {
             new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед", 500),
             new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410)
     );
+    public static final IMealRepository REPOSITORY = InMemoryMealRepository.getInstance();
+
+    static {
+        MEALS.forEach(REPOSITORY::addMeal);
+    }
 }

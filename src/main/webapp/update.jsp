@@ -2,6 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html lang="ru">
 <head>
+    <c:set var="action" value="${meal eq null ? 'Add' : 'Edit'}"/>
     <title>${action} Meal</title>
 </head>
 <body>

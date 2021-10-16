@@ -24,9 +24,15 @@ public class MealServlet extends HttpServlet {
     private static final String MEALS_URI = "meals";
     private static final int CALORIES_DAY_LIMIT = 2000;
 
-    private static final Logger log = getLogger(MealServlet.class);
+    private Logger log;
+    private MealRepository repository;
 
-    private final MealRepository repository = new InMemoryMealRepository();
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        log = getLogger(MealServlet.class);
+        repository = new InMemoryMealRepository();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -37,16 +43,14 @@ public class MealServlet extends HttpServlet {
         switch (action.toLowerCase()) {
             case "add":
                 forwardTo = UPDATE_JSP;
-                request.setAttribute("action", "Add");
                 break;
             case "update":
                 forwardTo = UPDATE_JSP;
-                Meal meal = repository.getById(Long.parseLong(request.getParameter("id")));
+                Meal meal = repository.getById(getIdFromRequest(request));
                 request.setAttribute("meal", meal);
-                request.setAttribute("action", "Edit");
                 break;
             case "delete":
-                repository.delete(Long.parseLong(request.getParameter("id")));
+                repository.delete(getIdFromRequest(request));
                 response.sendRedirect(MEALS_URI);
                 return;
             default:
@@ -74,5 +78,9 @@ public class MealServlet extends HttpServlet {
             repository.update(meal);
         }
         response.sendRedirect(MEALS_URI);
+    }
+
+    private Long getIdFromRequest(HttpServletRequest request) {
+        return Long.parseLong(request.getParameter("id"));
     }
 }

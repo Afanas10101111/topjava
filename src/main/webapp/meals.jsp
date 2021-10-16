@@ -29,7 +29,7 @@
     </tr>
     <c:forEach var="meal" items="${mealsTo}">
         <tr style="color:${meal.excess ? 'red' : 'green'}">
-            <th><t:format value="${meal.dateTime}" pattern="yyyy-MM-dd hh:mm"/></th>
+            <th><t:format value="${meal.dateTime}" pattern="yyyy-MM-dd HH:mm"/></th>
             <th>${meal.description}</th>
             <th>${meal.calories}</th>
             <th><a href="meals?action=update&id=${meal.id}">Update</a></th>

@@ -9,9 +9,9 @@ public interface MealRepository {
 
     Meal update(Meal meal);
 
-    Meal getById(long mealId);
+    Meal getById(long id);
 
-    void delete(long mealId);
+    void delete(long id);
 
     List<Meal> getAll();
 }

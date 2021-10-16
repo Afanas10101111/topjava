@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +44,7 @@ public class MealServlet extends HttpServlet {
         switch (action.toLowerCase()) {
             case "add":
                 forwardTo = UPDATE_JSP;
+                request.setAttribute("timeNow", LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
                 break;
             case "update":
                 forwardTo = UPDATE_JSP;

@@ -10,7 +10,7 @@
 <hr>
 <h2>${action} Meal</h2>
 <form method="post" action="meals">
-    <p>DateTime: <input type="datetime-local" name="dateTime" value="${meal.dateTime}" required/></p>
+    <p>DateTime: <input type="datetime-local" name="dateTime" value="${timeNow eq null ? meal.dateTime : timeNow}" required/></p>
     <p>Description: <input type="text" name="description" value="${meal.description}" required/></p>
     <p>Calories: <input type="number" name="calories" value="${meal.calories}" required/></p>
     <p>

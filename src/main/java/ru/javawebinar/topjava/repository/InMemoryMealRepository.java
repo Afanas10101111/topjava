@@ -36,8 +36,9 @@ public class InMemoryMealRepository implements MealRepository {
         if (id == null) {
             meal.setId(id = counter.getAndIncrement());
             repository.put(id, meal);
+            return meal;
         }
-        return meal;
+        return null;
     }
 
     @Override

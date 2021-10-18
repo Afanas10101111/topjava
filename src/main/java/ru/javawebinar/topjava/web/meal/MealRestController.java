@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.web.SecurityUtil;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
@@ -21,30 +23,41 @@ public class MealRestController {
         this.service = service;
     }
 
-    public List<Meal> getAll(int userId) {
-        log.info("user #{} getAll", userId);
-        return service.getAll(userId);
+    public List<Meal> getAll() {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} getAll", authUserId);
+        return service.getAll(authUserId);
     }
 
-    public Meal get(int userId, int id) {
-        log.info("user #{} get {}", userId, id);
-        return service.get(userId, id);
+    public List<Meal> getAllFilteredByDate(LocalDate startDate, LocalDate endDate) {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} getAll", authUserId);
+        return service.getAllFilteredByDate(authUserId, startDate, endDate);
     }
 
-    public Meal create(int userId, Meal meal) {
-        log.info("user #{} create {}", userId, meal);
+    public Meal get(int id) {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} get {}", authUserId, id);
+        return service.get(authUserId, id);
+    }
+
+    public Meal create(Meal meal) {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} create {}", authUserId, meal);
         checkNew(meal);
-        return service.create(userId, meal);
+        return service.create(authUserId, meal);
     }
 
-    public void delete(int userId, int id) {
-        log.info("user #{} delete {}", userId, id);
-        service.delete(userId, id);
+    public void delete(int id) {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} delete {}", authUserId, id);
+        service.delete(authUserId, id);
     }
 
-    public void update(int userId, Meal meal, int id) {
-        log.info("user #{} update {} with id={}", userId, meal, id);
+    public void update(Meal meal, int id) {
+        int authUserId = SecurityUtil.authUserId();
+        log.info("user #{} update {} with id={}", authUserId, meal, id);
         assureIdConsistent(meal, id);
-        service.update(userId, meal);
+        service.update(authUserId, meal);
     }
 }

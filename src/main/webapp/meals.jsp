@@ -18,11 +18,23 @@
 </head>
 <body>
 <section>
-    <h3><a href="index.html">Home</a></h3>
+    <h3><a href="index.jsp">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
+    <hr/>
+    <form method="get" action="meals">
+        <p>filter - StartDate: <input type="date" value="${filterStartDate}" name="filterStartDate"/></p>
+        <p>filter - EndDate:   <input type="date" value="${filterEndDate}" name="filterEndDate"/></p>
+        <p>filter - StartTime: <input type="time" value="${filterStartTime}" name="filterStartTime"/></p>
+        <p>filter - EndTime:   <input type="time" value="${filterEndTime}" name="filterEndTime"/></p>
+        <button type="submit">Filter</button>
+        <button type="reset">Reset</button>
+    </form>
+    <br>
+    <hr/>
+    <br>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>

@@ -25,10 +25,10 @@
     <br><br>
     <hr/>
     <form method="get" action="meals">
-        <p>filter - StartDate: <input type="date" value="${filterStartDate}" name="filterStartDate"/></p>
-        <p>filter - EndDate:   <input type="date" value="${filterEndDate}" name="filterEndDate"/></p>
-        <p>filter - StartTime: <input type="time" value="${filterStartTime}" name="filterStartTime"/></p>
-        <p>filter - EndTime:   <input type="time" value="${filterEndTime}" name="filterEndTime"/></p>
+        <p>filter - StartDate: <input type="date" value="${param.filterStartDate}" name="filterStartDate"/></p>
+        <p>filter - EndDate:   <input type="date" value="${param.filterEndDate}" name="filterEndDate"/></p>
+        <p>filter - StartTime: <input type="time" value="${param.filterStartTime}" name="filterStartTime"/></p>
+        <p>filter - EndTime:   <input type="time" value="${param.filterEndTime}" name="filterEndTime"/></p>
         <button type="submit">Filter</button>
         <button type="reset">Reset</button>
     </form>

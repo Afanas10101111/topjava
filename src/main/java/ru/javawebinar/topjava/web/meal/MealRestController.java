@@ -5,10 +5,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.DateTimeUtil;
+import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -23,16 +28,26 @@ public class MealRestController {
         this.service = service;
     }
 
-    public List<Meal> getAll() {
+    public List<MealTo> getAll() {
         int authUserId = SecurityUtil.authUserId();
         log.info("user #{} getAll", authUserId);
-        return service.getAll(authUserId);
+        return MealsUtil.getTos(service.getAll(authUserId));
     }
 
-    public List<Meal> getAllFilteredByDate(LocalDate startDate, LocalDate endDate) {
+    public List<MealTo> getAllFilteredByDateTime(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
         int authUserId = SecurityUtil.authUserId();
         log.info("user #{} getAll", authUserId);
-        return service.getAllFilteredByDate(authUserId, startDate, endDate);
+        return MealsUtil.getTos(service.getAllFilteredByDate(
+                        authUserId,
+                        startDate == null ? LocalDate.MIN : startDate,
+                        endDate == null ? LocalDate.MAX : endDate
+                ).stream()
+                .filter(m -> DateTimeUtil.isBetweenHalfOpen(
+                        m.getTime(),
+                        startTime == null ? LocalTime.MIN : startTime,
+                        endTime == null ? LocalTime.MAX : endTime
+                ))
+                .collect(Collectors.toList()));
     }
 
     public Meal get(int id) {

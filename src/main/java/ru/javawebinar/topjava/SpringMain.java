@@ -9,7 +9,9 @@ import ru.javawebinar.topjava.web.SecurityUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 import ru.javawebinar.topjava.web.user.AdminRestController;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.Arrays;
 
@@ -29,11 +31,13 @@ public class SpringMain {
             System.out.println("\n****\n");
 
             MealRestController mealRestController = appCtx.getBean(MealRestController.class);
+            SecurityUtil.setAuthUserId(1);
             System.out.println(mealRestController.getAll());
+            System.out.println(mealRestController.getAllFilteredByDateTime(LocalDate.MIN, LocalDate.MAX, LocalTime.MIN, LocalTime.MAX));
 
             System.out.println("\n****\n");
 
-            Meal someFood = new Meal(2, LocalDateTime.of(2022, Month.JANUARY, 31, 20, 0), "SomeFood", 888);
+            Meal someFood = new Meal(LocalDateTime.of(2022, Month.JANUARY, 31, 20, 0), "SomeFood", 888);
             SecurityUtil.setAuthUserId(2);
             mealRestController.create(someFood);
 

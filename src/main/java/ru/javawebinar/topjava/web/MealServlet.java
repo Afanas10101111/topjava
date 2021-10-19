@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.DateTimeUtil;
-import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.ServletException;
@@ -20,7 +18,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
@@ -45,7 +42,6 @@ public class MealServlet extends HttpServlet {
         String id = request.getParameter("id");
 
         Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
-                SecurityUtil.authUserId(),
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
                 Integer.parseInt(request.getParameter("calories")));
@@ -73,7 +69,7 @@ public class MealServlet extends HttpServlet {
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
-                        new Meal(SecurityUtil.authUserId(), LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
+                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
                         restController.get(getId(request));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
@@ -85,23 +81,16 @@ public class MealServlet extends HttpServlet {
                 String filterEndDateStr = Optional.ofNullable(request.getParameter("filterEndDate")).orElse("");
                 String filterStartTimeStr = Optional.ofNullable(request.getParameter("filterStartTime")).orElse("");
                 String filterEndTimeStr = Optional.ofNullable(request.getParameter("filterEndTime")).orElse("");
-                request.setAttribute("filterStartDate", filterStartDateStr);
-                request.setAttribute("filterEndDate", filterEndDateStr);
-                request.setAttribute("filterStartTime", filterStartTimeStr);
-                request.setAttribute("filterEndTime", filterEndTimeStr);
                 log.info("getAll, filterStartDateStr={}, filterEndDateStr={}, filterStartTimeStr={}, filterEndTimeStr={}"
                         , filterStartDateStr, filterEndDateStr, filterStartTimeStr, filterEndTimeStr);
-                LocalDate filterStartDate = filterStartDateStr.isEmpty() ? LocalDate.MIN : LocalDate.parse(filterStartDateStr);
-                LocalDate filterEndDate = filterEndDateStr.isEmpty() ? LocalDate.MAX : LocalDate.parse(filterEndDateStr);
-                LocalTime filterStartTime = filterStartTimeStr.isEmpty() ? LocalTime.MIN : LocalTime.parse(filterStartTimeStr);
-                LocalTime filterEndTime = filterEndTimeStr.isEmpty() ? LocalTime.MAX : LocalTime.parse(filterEndTimeStr);
-                request.setAttribute("meals",
-                        MealsUtil.getTos(
-                                        restController.getAllFilteredByDate(filterStartDate, filterEndDate),
-                                        MealsUtil.DEFAULT_CALORIES_PER_DAY
-                                ).stream()
-                                .filter(m -> DateTimeUtil.isBetweenHalfOpen(m.getTime(), filterStartTime, filterEndTime))
-                                .collect(Collectors.toList()));
+                LocalDate filterStartDate = filterStartDateStr.isEmpty() ? null : LocalDate.parse(filterStartDateStr);
+                LocalDate filterEndDate = filterEndDateStr.isEmpty() ? null : LocalDate.parse(filterEndDateStr);
+                LocalTime filterStartTime = filterStartTimeStr.isEmpty() ? null : LocalTime.parse(filterStartTimeStr);
+                LocalTime filterEndTime = filterEndTimeStr.isEmpty() ? null : LocalTime.parse(filterEndTimeStr);
+                request.setAttribute(
+                        "meals",
+                        restController.getAllFilteredByDateTime(filterStartDate, filterEndDate, filterStartTime, filterEndTime)
+                );
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }

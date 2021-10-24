@@ -46,6 +46,8 @@ public class MealServiceTest {
 
     @Autowired
     private MealService service;
+    @Autowired
+    private UserService userService;
 
     @Test
     public void create() {
@@ -140,5 +142,12 @@ public class MealServiceTest {
     @Test
     public void getBetweenInclusiveForNonExistentUser() {
         assertEquals(service.getBetweenInclusive(null, null, UserTestData.NOT_FOUND).size(), 0);
+    }
+
+    @Test
+    public void cascadeMealDeletionOnOwnerDeletion() {
+        assertEquals(service.getAll(USER_ID).size(), referenceSortedUserMeals.size());
+        userService.delete(USER_ID);
+        assertEquals(service.getAll(USER_ID).size(), 0);
     }
 }

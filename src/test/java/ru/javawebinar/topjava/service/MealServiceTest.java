@@ -11,25 +11,24 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.Util;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.temporal.ChronoUnit;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static ru.javawebinar.topjava.MealTestData.NOT_FOUND;
 import static ru.javawebinar.topjava.MealTestData.START_MEAL_ID;
 import static ru.javawebinar.topjava.MealTestData.assertMatch;
 import static ru.javawebinar.topjava.MealTestData.getNew;
 import static ru.javawebinar.topjava.MealTestData.getUpdated;
+import static ru.javawebinar.topjava.MealTestData.referenceFilteredSortedUserMeals;
 import static ru.javawebinar.topjava.MealTestData.referenceSortedUserMeals;
-import static ru.javawebinar.topjava.MealTestData.userMeal02;
+import static ru.javawebinar.topjava.MealTestData.userMeal01;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
@@ -46,26 +45,31 @@ public class MealServiceTest {
 
     @Autowired
     private MealService service;
+
     @Autowired
     private UserService userService;
 
     @Test
     public void create() {
-        Meal newMeal = service.create(getNew(), USER_ID);
-        assertMatch(service.get(newMeal.getId(), USER_ID), newMeal);
+        Meal created = service.create(getNew(), USER_ID);
+        Integer createdId = created.getId();
+        Meal newStandard = getNew();
+        newStandard.setId(createdId);
+        assertMatch(created, newStandard);
+        assertMatch(service.get(createdId, USER_ID), newStandard);
     }
 
     @Test
     public void createDuplicateDateTimeCreate() {
         assertThrows(
                 DataAccessException.class,
-                () -> service.create(new Meal(service.get(START_MEAL_ID, USER_ID).getDateTime(), "Duplicate", 1), USER_ID)
+                () -> service.create(new Meal(userMeal01.getDateTime(), "Duplicate", 1), USER_ID)
         );
     }
 
     @Test
     public void get() {
-        assertMatch(service.get(START_MEAL_ID, USER_ID), userMeal02);
+        assertMatch(service.get(START_MEAL_ID, USER_ID), userMeal01);
     }
 
     @Test
@@ -84,7 +88,7 @@ public class MealServiceTest {
         int id = updated.getId();
         assertThat(updated).usingRecursiveComparison().isNotEqualTo(service.get(id, USER_ID));
         service.update(updated, USER_ID);
-        assertMatch(service.get(id, USER_ID), updated);
+        assertMatch(service.get(id, USER_ID), getUpdated());
     }
 
     @Test
@@ -120,18 +124,13 @@ public class MealServiceTest {
 
     @Test
     public void getAllForNonExistentUser() {
-        assertEquals(service.getAll(UserTestData.NOT_FOUND).size(), 0);
+        assertTrue(service.getAll(UserTestData.NOT_FOUND).isEmpty());
     }
 
     @Test
     public void getBetweenInclusive() {
         LocalDate startEndDate = LocalDate.of(2021, Month.JANUARY, 30);
-        assertMatch(
-                service.getBetweenInclusive(startEndDate, startEndDate, USER_ID),
-                referenceSortedUserMeals.stream()
-                        .filter(m -> Util.isBetweenHalfOpen(m.getDate(), startEndDate, startEndDate.plus(1, ChronoUnit.DAYS)))
-                        .collect(Collectors.toList())
-        );
+        assertMatch(service.getBetweenInclusive(startEndDate, startEndDate, USER_ID), referenceFilteredSortedUserMeals);
     }
 
     @Test
@@ -141,13 +140,13 @@ public class MealServiceTest {
 
     @Test
     public void getBetweenInclusiveForNonExistentUser() {
-        assertEquals(service.getBetweenInclusive(null, null, UserTestData.NOT_FOUND).size(), 0);
+        assertTrue(service.getBetweenInclusive(null, null, UserTestData.NOT_FOUND).isEmpty());
     }
 
     @Test
     public void cascadeMealDeletionOnOwnerDeletion() {
         assertEquals(service.getAll(USER_ID).size(), referenceSortedUserMeals.size());
         userService.delete(USER_ID);
-        assertEquals(service.getAll(USER_ID).size(), 0);
+        assertTrue(service.getAll(USER_ID).isEmpty());
     }
 }

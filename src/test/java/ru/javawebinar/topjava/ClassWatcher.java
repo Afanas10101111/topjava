@@ -20,8 +20,9 @@ public class ClassWatcher extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
-        logger.info("\n****\nSummary\n****");
-        allTests.forEach((key, value) -> logger.info("{}: {} ms", key, value));
-        logger.info("\n****");
+        StringBuilder sb = new StringBuilder("\n\t****\n\tSummary\n\t****\n");
+        allTests.forEach((key, value) -> sb.append("\t\t").append(key).append(": ").append(value).append(" ms\n"));
+        sb.append("\t****");
+        logger.info(sb.toString());
     }
 }

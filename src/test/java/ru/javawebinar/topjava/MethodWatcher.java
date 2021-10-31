@@ -1,27 +1,20 @@
 package ru.javawebinar.topjava;
 
-import org.junit.rules.TestWatcher;
+import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
-public class MethodWatcher extends TestWatcher {
+public class MethodWatcher extends Stopwatch {
     private static final Logger logger = LoggerFactory.getLogger(MethodWatcher.class);
 
-    private long start;
-
     @Override
-    protected void starting(Description description) {
-        start = new Date().getTime();
-    }
-
-    @Override
-    protected void finished(Description description) {
-        long ms = (new Date()).getTime() - start;
-        String classMethodName = description.getTestClass().getName() + "::" + description.getMethodName();
-        logger.info("\n****\n{} completed in {} ms\n****", classMethodName, ms);
-        ClassWatcher.allTests.put(classMethodName, ms);
+    protected void finished(long nanos, Description description) {
+        String methodName = description.getMethodName();
+        long ms = TimeUnit.MILLISECONDS.convert(nanos, TimeUnit.NANOSECONDS);
+        logger.info("\n\t****\n\t{} completed in {} ms\n\t****", methodName, ms);
+        ClassWatcher.allTests.put(methodName, ms);
     }
 }

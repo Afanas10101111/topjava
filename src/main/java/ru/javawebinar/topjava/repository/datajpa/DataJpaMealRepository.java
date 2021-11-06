@@ -10,31 +10,20 @@ import java.util.List;
 @Repository
 public class DataJpaMealRepository implements MealRepository {
     private final CrudMealRepository crudRepository;
-    private final DataJpaUserRepository userRepository;
+    private final CrudUserRepository userRepository;
 
-    public DataJpaMealRepository(CrudMealRepository crudRepository, DataJpaUserRepository userRepository) {
+    public DataJpaMealRepository(CrudMealRepository crudRepository, CrudUserRepository userRepository) {
         this.crudRepository = crudRepository;
         this.userRepository = userRepository;
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
-        // this solution makes unnecessary user select for update scenario
-        /*if (meal.isNew() || get(meal.id(), userId) != null) {
-            meal.setUser(userRepository.get(userId));
+        if (meal.isNew() || get(meal.id(), userId) != null) {
+            meal.setUser(userRepository.getById(userId));
             return crudRepository.save(meal);
         }
-        return null;*/
-
-        Meal mealFromDb;
-        if (meal.isNew()) {
-            meal.setUser(userRepository.get(userId));
-        } else if ((mealFromDb = get(meal.id(), userId)) != null) {
-            meal.setUser(mealFromDb.getUser());
-        } else {
-            return null;
-        }
-        return crudRepository.save(meal);
+        return null;
     }
 
     @Override

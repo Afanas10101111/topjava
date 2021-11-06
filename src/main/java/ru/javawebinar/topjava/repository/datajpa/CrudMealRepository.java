@@ -36,6 +36,9 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
             @Param("endDateTime") LocalDateTime endDateTime
     );
 
+    @Query("SELECT m FROM Meal m JOIN FETCH m.user WHERE m.id=:id AND m.user.id=:userId")
+    Meal findMealAndUser(@Param("id") int id, @Param("userId") int userId);
+
     // generated queries works but aren`t optimal :(
     @Transactional
     int deleteByIdAndUserId(int id, int userId);

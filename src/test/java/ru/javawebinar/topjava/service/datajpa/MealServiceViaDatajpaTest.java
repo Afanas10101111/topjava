@@ -21,14 +21,14 @@ import static ru.javawebinar.topjava.UserTestData.admin;
 public class MealServiceViaDatajpaTest extends MealServiceTest {
 
     @Test
-    public void getMealWithUser() {
-        Meal actual = service.getMealWithUser(ADMIN_MEAL_ID, ADMIN_ID);
+    public void getWithUser() {
+        Meal actual = service.getWithUser(ADMIN_MEAL_ID, ADMIN_ID);
         MEAL_MATCHER.assertMatch(actual, adminMeal1);
         USER_MATCHER.assertMatch(actual.getUser(), admin);
     }
 
     @Test
-    public void getAbsentMealWithUser() {
-        assertThrows(NotFoundException.class, () -> service.getMealWithUser(NOT_FOUND, USER_ID));
+    public void getAbsentWithUser() {
+        assertThrows(NotFoundException.class, () -> service.getWithUser(NOT_FOUND, USER_ID));
     }
 }

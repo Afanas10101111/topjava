@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.repository.datajpa;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,30 +19,22 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
     int delete(@Param("id") int id, @Param("userId") int userId);
 
     @Query("SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId")
-    Meal findUserMeal(@Param("id") int id, @Param("userId") int userId);
+    Meal find(@Param("id") int id, @Param("userId") int userId);
 
     @Query("SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC")
-    List<Meal> findAllUserMeal(@Param("userId") int userId);
+    List<Meal> findAll(@Param("userId") int userId);
 
     @Query("""
             SELECT m FROM Meal m WHERE m.user.id=:userId
             AND m.dateTime >= :startDateTime AND m.dateTime < :endDateTime
             ORDER BY m.dateTime DESC
             """)
-    List<Meal> findAllUserMealBetween(
+    List<Meal> findAllBetween(
             @Param("userId") int userId,
             @Param("startDateTime") LocalDateTime startDateTime,
             @Param("endDateTime") LocalDateTime endDateTime
     );
 
     @Query("SELECT m FROM Meal m JOIN FETCH m.user WHERE m.id=:id AND m.user.id=:userId")
-    Meal findMealAndUser(@Param("id") int id, @Param("userId") int userId);
-
-    // generated queries works but aren`t optimal :(
-    @Transactional
-    int deleteByIdAndUserId(int id, int userId);
-
-    Meal findByIdAndUserId(int id, int userId);
-
-    List<Meal> findAllByUserId(int userId, Sort sort);
+    Meal findWithUser(@Param("id") int id, @Param("userId") int userId);
 }

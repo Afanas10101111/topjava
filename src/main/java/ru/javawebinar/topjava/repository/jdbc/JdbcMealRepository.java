@@ -23,8 +23,6 @@ public abstract class JdbcMealRepository implements MealRepository {
 
     protected final SimpleJdbcInsert insertMeal;
 
-    protected Class<?> clazz;
-
     protected JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
@@ -40,7 +38,7 @@ public abstract class JdbcMealRepository implements MealRepository {
                 .addValue("id", meal.getId())
                 .addValue("description", meal.getDescription())
                 .addValue("calories", meal.getCalories())
-                .addValue("date_time", formattedDateTime(meal.getDateTime(), clazz))
+                .addValue("date_time", formattedDateTime(meal.getDateTime()))
                 .addValue("user_id", userId);
 
         if (meal.isNew()) {
@@ -79,10 +77,8 @@ public abstract class JdbcMealRepository implements MealRepository {
     public List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM meals WHERE user_id=?  AND date_time >=  ? AND date_time < ? ORDER BY date_time DESC",
-                ROW_MAPPER, userId, formattedDateTime(startDateTime, clazz), formattedDateTime(endDateTime, clazz));
+                ROW_MAPPER, userId, formattedDateTime(startDateTime), formattedDateTime(endDateTime));
     }
 
-    protected <T> T formattedDateTime(LocalDateTime localDateTime, Class<T> clazz) {
-        return clazz.cast(localDateTime);
-    }
+    abstract <T> T formattedDateTime(LocalDateTime localDateTime);
 }

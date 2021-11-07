@@ -1,6 +1,5 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.springframework.core.env.Environment;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,13 +8,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.repository.jdbc.config.ProfileBasedLocalDateTimeFormatter;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -31,19 +28,18 @@ public class JdbcMealRepository implements MealRepository {
 
     private final ProfileBasedLocalDateTimeFormatter<?> formatter;
 
-    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, Environment environment) {
+    public JdbcMealRepository(
+            JdbcTemplate jdbcTemplate,
+            NamedParameterJdbcTemplate namedParameterJdbcTemplate,
+            ProfileBasedLocalDateTimeFormatter<?> formatter
+    ) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-
-        if (Arrays.asList(environment.getActiveProfiles()).contains(Profiles.HSQL_DB)) {
-            formatter = Timestamp::valueOf;
-        } else {
-            formatter = localDateTime -> localDateTime;
-        }
+        this.formatter = formatter;
     }
 
     @Override
@@ -92,9 +88,5 @@ public class JdbcMealRepository implements MealRepository {
         return jdbcTemplate.query(
                 "SELECT * FROM meals WHERE user_id=?  AND date_time >=  ? AND date_time < ? ORDER BY date_time DESC",
                 ROW_MAPPER, userId, formatter.getFormatted(startDateTime), formatter.getFormatted(endDateTime));
-    }
-
-    private interface ProfileBasedLocalDateTimeFormatter<T> {
-        T getFormatted(LocalDateTime localDateTime);
     }
 }

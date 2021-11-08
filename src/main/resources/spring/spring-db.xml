@@ -26,6 +26,8 @@
               p:url="${database.url}"
               p:username="${database.username}"
               p:password="${database.password}"/>
+
+        <bean class="ru.javawebinar.topjava.repository.jdbc.formatter.HsqldbLocalDateTimeFormatter"/>
     </beans>
 
     <beans profile="postgres">
@@ -46,6 +48,8 @@
               p:url="${database.url}"
               p:username="${database.username}"
               p:password="${database.password}"/>
+
+        <bean class="ru.javawebinar.topjava.repository.jdbc.formatter.PostgresLocalDateTimeFormatter"/>
     </beans>
 
     <beans profile="jdbc">

@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.repository.jdbc.config;
+package ru.javawebinar.topjava.repository.jdbc.formatter;
 
 import java.time.LocalDateTime;
 

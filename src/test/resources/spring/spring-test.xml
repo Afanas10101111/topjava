@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="noOpCacheManager" class="org.springframework.cache.support.NoOpCacheManager"/>
+
+    <beans profile="jpa,datajpa">
+        <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+            <property name="properties">
+                <map>
+                    <entry key="entityManagerFactory.jpaPropertyMap[#{T(org.hibernate.cfg.AvailableSettings).USE_SECOND_LEVEL_CACHE}]"
+                           value="false"/>
+                </map>
+            </property>
+        </bean>
+    </beans>
+</beans>

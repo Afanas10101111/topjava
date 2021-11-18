@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.web.meal;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -19,7 +20,7 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @Controller
-public class JspMealController extends MealController {
+public class JspMealController extends AbstractMealController {
     public static final String MEAL_ATTR = "meal";
     public static final String MEALS_ATTR = "meals";
 
@@ -28,35 +29,35 @@ public class JspMealController extends MealController {
     public static final String MEAL_FORM_LINK = "/mealForm";
 
     public JspMealController(MealService service) {
-        super(service);
+        super(service, LoggerFactory.getLogger(JspMealController.class));
     }
 
     @GetMapping(MEALS_LINK)
-    public String getAllForUi(Model model) {
+    public String getAll(Model model) {
         model.addAttribute(MEALS_ATTR, getAll());
         return MEALS_LINK;
     }
 
     @GetMapping(MEALS_LINK + "/delete")
-    public String deleteForUi(HttpServletRequest request) {
+    public String delete(HttpServletRequest request) {
         delete(getId(request));
         return REDIRECT_MEALS;
     }
 
     @GetMapping(MEALS_LINK + "/update")
-    public String updateForUi(HttpServletRequest request) {
+    public String update(HttpServletRequest request) {
         request.setAttribute(MEAL_ATTR, get(getId(request)));
         return MEAL_FORM_LINK;
     }
 
     @GetMapping(MEALS_LINK + "/create")
-    public String createForUi(Model model) {
+    public String create(Model model) {
         model.addAttribute(MEAL_ATTR, new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
         return MEAL_FORM_LINK;
     }
 
     @GetMapping(MEALS_LINK + "/filter")
-    public String filterForUi(HttpServletRequest request) {
+    public String filter(HttpServletRequest request) {
         LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
         LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
         LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
@@ -66,7 +67,7 @@ public class JspMealController extends MealController {
     }
 
     @PostMapping(MEALS_LINK)
-    public String setForUi(HttpServletRequest request) {
+    public String save(HttpServletRequest request) {
         Meal meal = new Meal(
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),

@@ -1,14 +1,12 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
-import ru.javawebinar.topjava.repository.JpaUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
@@ -25,14 +23,11 @@ import static ru.javawebinar.topjava.UserTestData.getNew;
 import static ru.javawebinar.topjava.UserTestData.getUpdated;
 import static ru.javawebinar.topjava.UserTestData.user;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AbstractUserServiceTest extends AbstractServiceTest {
 
     @Autowired
     protected UserService service;
-
-    @Autowired
-    @Qualifier("noOpCacheManager")
-    private CacheManager cacheManager;
 
     @Test
     public void create() {
@@ -79,16 +74,25 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    public void update() {
+    public void a0update() {
         User updated = getUpdated();
         service.update(updated);
-        USER_MATCHER.assertMatch(service.get(ADMIN_ID), getUpdated());
+        USER_MATCHER.assertMatch(service.getAll(), getUpdated(), user);
     }
 
     @Test
-    public void getAll() {
+    public void a1getAll() {
         List<User> all = service.getAll();
         USER_MATCHER.assertMatch(all, admin, user);
+    }
+
+    @Test
+    public void getAllModified() {
+        User newUser = new User(null, "New", "new@gmail.com", "newPass", 1555, false, new Date(), null);
+        User newUserClone = new User(newUser);
+        User created = service.create(newUserClone);
+        newUser.setId(created.getId());
+        USER_MATCHER.assertMatch(service.getAll(), admin, newUser, user);
     }
 
     @Test

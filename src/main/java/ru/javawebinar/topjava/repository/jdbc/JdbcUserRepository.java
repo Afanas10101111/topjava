@@ -13,11 +13,13 @@ import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
+import javax.validation.Validator;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 @Repository
@@ -35,14 +37,14 @@ public class JdbcUserRepository implements UserRepository {
     private final ValidatorForJdbc<User> validator;
 
     @Autowired
-    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, Validator validator) {
         this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        validator = new ValidatorForJdbc<>();
+        this.validator = new ValidatorForJdbc<>(validator);
     }
 
     @Override
@@ -51,18 +53,15 @@ public class JdbcUserRepository implements UserRepository {
         validator.validate(user);
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
-        boolean isItAnUpdate = true;
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
-            isItAnUpdate = false;
         } else if (namedParameterJdbcTemplate.update("""
                    UPDATE users SET name=:name, email=:email, password=:password, 
                    registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id
                 """, parameterSource) == 0) {
             return null;
-        }
-        if (isItAnUpdate) {
+        } else {
             jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.id());
         }
         Set<Role> roles = user.getRoles();
@@ -70,9 +69,9 @@ public class JdbcUserRepository implements UserRepository {
                 "INSERT INTO user_roles (user_id, role) VALUES (?, ?)",
                 roles,
                 roles.size(),
-                (ps, argument) -> {
+                (ps, role) -> {
                     ps.setInt(1, user.id());
-                    ps.setString(2, argument.name());
+                    ps.setString(2, role.name());
                 }
         );
         return user;
@@ -101,41 +100,35 @@ public class JdbcUserRepository implements UserRepository {
     public List<User> getAll() {
         Map<Integer, User> users = new LinkedHashMap<>();
         jdbcTemplate.query(
-                "SELECT * FROM users JOIN user_roles ON users.id = user_roles.user_id ORDER BY name, email",
+                "SELECT * FROM users LEFT JOIN user_roles ON users.id = user_roles.user_id ORDER BY name, email",
                 (rs, rowNum) -> {
                     int id = rs.getInt("id");
                     User user = users.get(id);
                     if (user == null) {
-                        user = new User(
-                                id,
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password"),
-                                rs.getInt("calories_per_day"),
-                                rs.getBoolean("enabled"),
-                                rs.getDate("registered"),
-                                new HashSet<>()
-                        );
+                        user = ROW_MAPPER.mapRow(rs, rowNum);
+                        Objects.requireNonNull(user);
+                        user.setRoles(new HashSet<>());
                         users.put(id, user);
                     }
-                    user.addRoles(Role.valueOf(rs.getString("role")));
+                    String role = rs.getString("role");
+                    if (role != null) {
+                        user.addRoles(Role.valueOf(role));
+                    }
                     return user;
                 }
         );
-        return users.values().stream().toList();
+        return new ArrayList<>(users.values());
     }
 
     private User withRoles(User user) {
-        Optional.ofNullable(user).ifPresent(
-                u -> {
-                    List<Role> roles = jdbcTemplate.query(
-                            "SELECT * FROM user_roles WHERE user_id=?",
-                            (rs, rowNum) -> Role.valueOf(rs.getString("role")),
-                            user.id()
-                    );
-                    user.setRoles(roles);
-                }
-        );
+        if (user != null) {
+            List<Role> roles = jdbcTemplate.query(
+                    "SELECT * FROM user_roles WHERE user_id=?",
+                    (rs, rowNum) -> Role.valueOf(rs.getString("role")),
+                    user.id()
+            );
+            user.setRoles(roles);
+        }
         return user;
     }
 }

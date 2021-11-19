@@ -7,7 +7,7 @@
 <body>
 <jsp:include page="fragments/bodyHeader.jsp"/>
 <section>
-    <h2><spring:message code="${requestScope.get('org.springframework.web.util.UrlPathHelper.PATH') eq '/meals/create' ? 'meal.add_meal' : 'meal.edit_meal'}"/></h2>
+    <h2><spring:message code="${meal.id eq null ? 'meal.add_meal' : 'meal.edit_meal'}"/></h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="meals">
         <input type="hidden" name="id" value="${meal.id}">

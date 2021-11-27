@@ -1,11 +1,15 @@
 package ru.javawebinar.topjava;
 
+import org.springframework.test.web.servlet.ResultActions;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Date;
 
+import static ru.javawebinar.topjava.MealTestData.MEAL_MATCHER;
 import static ru.javawebinar.topjava.model.AbstractBaseEntity.START_SEQ;
 
 public class UserTestData {
@@ -31,5 +35,11 @@ public class UserTestData {
         updated.setEnabled(false);
         updated.setRoles(Collections.singletonList(Role.ADMIN));
         return updated;
+    }
+
+    public static void assertMatchUserWithMeals(ResultActions result, User expected, Iterable<Meal> expectedMeals) throws UnsupportedEncodingException {
+        User actual = USER_MATCHER.readFromJson(result);
+        USER_MATCHER.assertMatch(actual, expected);
+        MEAL_MATCHER.assertMatch(actual.getMeals(), expectedMeals);
     }
 }

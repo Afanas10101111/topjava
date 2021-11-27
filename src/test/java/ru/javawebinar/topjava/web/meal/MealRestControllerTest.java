@@ -45,19 +45,22 @@ class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void getBetweenLocalDateTime() throws Exception {
         performCheck(MockMvcRequestBuilders.get(
-                REST_URL + "between?startDate=2011-12-03T00:00:00&startTime=2011-12-03T00:00:00" +
-                        "&endDate=2021-12-03T10:15:30&endTime=2011-12-03T23:59:59"
+                REST_URL + "filtered?startDate=2011-12-03&startTime=00:00" +
+                        "&endDate=2021-12-03&endTime=23:59"
         ), status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(mealTos));
     }
 
     @Test
-    void getBetweenGoodOldLocalDateTime() throws Exception {
-        performCheck(MockMvcRequestBuilders.get(
-                REST_URL + "between?startDate=2011-12-03T00:00:00&startTime=2011-12-03T00:00:00" +
-                        "&endDate=2011-12-03T10:15:30&endTime=2011-12-03T23:59:59"
-        ), status().isOk())
+    void getBetweenGoodOldTimes() throws Exception {
+        performCheck(MockMvcRequestBuilders.get(REST_URL + "filtered?endDate=2011-12-03"), status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(Collections.emptyList()));
+    }
+
+    @Test
+    void getBetweenWrongDateFormat() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "filtered?endDate=2011-12-03T10:15:30"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

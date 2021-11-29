@@ -32,28 +32,32 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getAll() throws Exception {
-        performCheck(MockMvcRequestBuilders.get(REST_URL), status().isOk())
+        performAndCheckJsonContent(MockMvcRequestBuilders.get(REST_URL))
+                .andExpect(status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(mealTos));
     }
 
     @Test
     void get() throws Exception {
-        performCheck(MockMvcRequestBuilders.get(REST_URL + MEAL1_ID), status().isOk())
+        performAndCheckJsonContent(MockMvcRequestBuilders.get(REST_URL + MEAL1_ID))
+                .andExpect(status().isOk())
                 .andExpect(MEAL_MATCHER.contentJson(meal1));
     }
 
     @Test
     void getBetweenLocalDateTime() throws Exception {
-        performCheck(MockMvcRequestBuilders.get(
+        performAndCheckJsonContent(MockMvcRequestBuilders.get(
                 REST_URL + "filtered?startDate=2011-12-03&startTime=00:00" +
                         "&endDate=2021-12-03&endTime=23:59"
-        ), status().isOk())
+        ))
+                .andExpect(status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(mealTos));
     }
 
     @Test
     void getBetweenGoodOldTimes() throws Exception {
-        performCheck(MockMvcRequestBuilders.get(REST_URL + "filtered?endDate=2011-12-03"), status().isOk())
+        performAndCheckJsonContent(MockMvcRequestBuilders.get(REST_URL + "filtered?endDate=2011-12-03"))
+                .andExpect(status().isOk())
                 .andExpect(MEAL_TO_MATCHER.contentJson(Collections.emptyList()));
     }
 
@@ -66,12 +70,12 @@ class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void createWithLocation() throws Exception {
         Meal aNew = getNew();
-        ResultActions result = performCheck(
+        ResultActions result = performAndCheckJsonContent(
                 MockMvcRequestBuilders.post(REST_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(JsonUtil.writeValue(aNew)),
-                status().isCreated()
-        );
+                        .content(JsonUtil.writeValue(aNew))
+        )
+                .andExpect(status().isCreated());
         Meal created = MEAL_MATCHER.readFromJson(result);
         int id = created.id();
         aNew.setId(id);
@@ -82,7 +86,7 @@ class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void update() throws Exception {
         Meal updated = getUpdated();
-        performWithoutContentTypeCheck(
+        performAndCheckIsNoContent(
                 MockMvcRequestBuilders.put(REST_URL + MEAL1_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.writeValue(updated))
@@ -92,7 +96,7 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void delete() throws Exception {
-        performWithoutContentTypeCheck(MockMvcRequestBuilders.delete(REST_URL + MEAL1_ID));
+        performAndCheckIsNoContent(MockMvcRequestBuilders.delete(REST_URL + MEAL1_ID));
         assertThrows(NotFoundException.class, () -> service.get(MEAL1_ID, USER_ID));
     }
 }

@@ -60,6 +60,10 @@ public class MatcherFactory {
             return JsonUtil.readValue(getContent(action.andReturn()), clazz);
         }
 
+        public T readFromJson(MvcResult result) throws UnsupportedEncodingException {
+            return JsonUtil.readValue(getContent(result), clazz);
+        }
+
         private static String getContent(MvcResult result) throws UnsupportedEncodingException {
             return result.getResponse().getContentAsString();
         }

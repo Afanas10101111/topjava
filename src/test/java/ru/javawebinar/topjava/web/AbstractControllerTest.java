@@ -6,7 +6,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,14 +55,13 @@ public abstract class AbstractControllerTest {
         return mockMvc.perform(builder);
     }
 
-    protected ResultActions performCheck(MockHttpServletRequestBuilder builder, ResultMatcher expectedStatus) throws Exception {
+    protected ResultActions performAndCheckJsonContent(MockHttpServletRequestBuilder builder) throws Exception {
         return perform(builder)
                 .andDo(print())
-                .andExpect(expectedStatus)
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
-    protected void performWithoutContentTypeCheck(MockHttpServletRequestBuilder builder) throws Exception {
+    protected void performAndCheckIsNoContent(MockHttpServletRequestBuilder builder) throws Exception {
         perform(builder)
                 .andDo(print())
                 .andExpect(status().isNoContent());

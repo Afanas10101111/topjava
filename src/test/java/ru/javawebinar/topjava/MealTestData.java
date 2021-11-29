@@ -2,6 +2,7 @@ package ru.javawebinar.topjava;
 
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.Month;
 import java.time.temporal.ChronoUnit;
@@ -28,16 +29,8 @@ public class MealTestData {
     public static final Meal adminMeal1 = new Meal(ADMIN_MEAL_ID, of(2020, Month.JANUARY, 31, 14, 0), "Админ ланч", 510);
     public static final Meal adminMeal2 = new Meal(ADMIN_MEAL_ID + 1, of(2020, Month.JANUARY, 31, 21, 0), "Админ ужин", 1500);
 
-    public static final MealTo meal1To = new MealTo(meal1.id(), meal1.getDateTime(), meal1.getDescription(), meal1.getCalories(), false);
-    public static final MealTo meal2To = new MealTo(meal2.id(), meal2.getDateTime(), meal2.getDescription(), meal2.getCalories(), false);
-    public static final MealTo meal3To = new MealTo(meal3.id(), meal3.getDateTime(), meal3.getDescription(), meal3.getCalories(), false);
-    public static final MealTo meal4To = new MealTo(meal4.id(), meal4.getDateTime(), meal4.getDescription(), meal4.getCalories(), true);
-    public static final MealTo meal5To = new MealTo(meal5.id(), meal5.getDateTime(), meal5.getDescription(), meal5.getCalories(), true);
-    public static final MealTo meal6To = new MealTo(meal6.id(), meal6.getDateTime(), meal6.getDescription(), meal6.getCalories(), true);
-    public static final MealTo meal7To = new MealTo(meal7.id(), meal7.getDateTime(), meal7.getDescription(), meal7.getCalories(), true);
-
     public static final List<Meal> meals = List.of(meal7, meal6, meal5, meal4, meal3, meal2, meal1);
-    public static final List<MealTo> mealTos = List.of(meal7To, meal6To, meal5To, meal4To, meal3To, meal2To, meal1To);
+    public static final List<MealTo> mealTos = MealsUtil.getTos(meals, MealsUtil.DEFAULT_CALORIES_PER_DAY);
 
     public static Meal getNew() {
         return new Meal(null, of(2020, Month.FEBRUARY, 1, 18, 0), "Созданный ужин", 300);

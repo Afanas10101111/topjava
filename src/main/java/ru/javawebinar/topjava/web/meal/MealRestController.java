@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.web.json.JacksonObjectMapper;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -37,7 +36,7 @@ public class MealRestController extends AbstractMealController {
     @Override
     @GetMapping("/{id}")
     public Meal get(@PathVariable int id) {
-        return getJsonFormatted(super.get(id));
+        return super.get(id);
     }
 
     @GetMapping("/filtered")
@@ -57,7 +56,7 @@ public class MealRestController extends AbstractMealController {
                 .path(REST_URL + "/{id}")
                 .buildAndExpand(created.getId())
                 .toUri();
-        return ResponseEntity.created(uriOfNewResource).body(getJsonFormatted(created));
+        return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
     @Override
@@ -72,9 +71,5 @@ public class MealRestController extends AbstractMealController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable int id) {
         super.delete(id);
-    }
-
-    private Meal getJsonFormatted(Meal meal) {
-        return JacksonObjectMapper.getMapper().convertValue(meal, Meal.class);
     }
 }

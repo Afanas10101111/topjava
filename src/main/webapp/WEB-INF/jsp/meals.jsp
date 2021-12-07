@@ -12,26 +12,31 @@
 <section>
     <h3 class="text-center"><spring:message code="meal.title"/></h3>
 
-    <form method="get" action="meals/filter">
+    <form id="filter" class="container">
         <dl>
             <dt><spring:message code="meal.startDate"/>:</dt>
-            <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
+            <dd><input type="date" name="startDate"></dd>
         </dl>
         <dl>
             <dt><spring:message code="meal.endDate"/>:</dt>
-            <dd><input type="date" name="endDate" value="${param.endDate}"></dd>
+            <dd><input type="date" name="endDate"></dd>
         </dl>
         <dl>
             <dt><spring:message code="meal.startTime"/>:</dt>
-            <dd><input type="time" name="startTime" value="${param.startTime}"></dd>
+            <dd><input type="time" name="startTime"></dd>
         </dl>
         <dl>
             <dt><spring:message code="meal.endTime"/>:</dt>
-            <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
+            <dd><input type="time" name="endTime"></dd>
         </dl>
-        <button type="submit"><spring:message code="meal.filter"/></button>
+        <button type="button" class="btn btn-primary" onclick="filter()">
+            <span class="fa fa-filter"></span>
+            <spring:message code="meal.filter"/>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="resetFilter()">
+            <spring:message code="meal.clear-filter"/>
+        </button>
     </form>
-    <hr>
     <div class="jumbotron pt-4">
         <div class="container">
             <button class="btn btn-primary" onclick="add()">
@@ -80,7 +85,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="description" class="col-form-label"><spring:message code="meal.description"/></label>
+                        <label for="description" class="col-form-label"><spring:message
+                                code="meal.description"/></label>
                         <input type="text" class="form-control" id="description" name="description"
                                placeholder="<spring:message code="meal.description"/>">
                     </div>

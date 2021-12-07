@@ -37,3 +37,18 @@ $(function () {
         })
     );
 });
+
+function filter() {
+    $.ajax({
+        type: "GET",
+        url: ctx.ajaxUrl + "filter",
+        data: $('#filter').serialize()
+    }).done(function (data) {
+        ctx.datatableApi.clear().rows.add(data).draw();
+    });
+}
+
+function resetFilter() {
+    $('#filter').trigger("reset")
+    filter();
+}

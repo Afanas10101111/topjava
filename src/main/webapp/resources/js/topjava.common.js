@@ -33,13 +33,13 @@ function deleteRow(id) {
 }
 
 function updateTable() {
-    if (window.filter) {
-        filter();
-    } else {
-        $.get(ctx.ajaxUrl, function (data) {
-            ctx.datatableApi.clear().rows.add(data).draw();
-        });
-    }
+    $.get(ctx.ajaxUrl, function (data) {
+        drawTable(data)
+    });
+}
+
+function drawTable(data) {
+    ctx.datatableApi.clear().rows.add(data).draw();
 }
 
 function save() {

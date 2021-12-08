@@ -44,11 +44,15 @@ function filter() {
         url: ctx.ajaxUrl + "filter",
         data: $('#filter').serialize()
     }).done(function (data) {
-        ctx.datatableApi.clear().rows.add(data).draw();
+        drawTable(data);
     });
 }
 
 function resetFilter() {
-    $('#filter').trigger("reset")
+    $('#filter').trigger("reset");
+    updateTable();
+}
+
+function updateTable() {
     filter();
 }

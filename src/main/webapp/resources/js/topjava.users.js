@@ -45,3 +45,13 @@ $(function () {
         })
     );
 });
+
+function enableUser(id) {
+    $.ajax({
+        type: "PATCH",
+        url: ctx.ajaxUrl + id + "?flag=" + $("#" + id + "_box").is(":checked"),
+    }).done(function () {
+        updateTable();
+        successNoty("Saved");
+    });
+}

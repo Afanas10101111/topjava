@@ -13,13 +13,14 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class MealTo extends BaseTo implements Serializable {
+    private static final String DATE_TIME_FORMAT_PATTERN_FOR_UI = "yyyy-MM-dd HH:mm";
     private static final String EMPTY_FIELD_ERROR_MESSAGE = "must not be empty";
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @NotNull(message = EMPTY_FIELD_ERROR_MESSAGE)
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @DateTimeFormat(pattern = DATE_TIME_FORMAT_PATTERN_FOR_UI)
     private final LocalDateTime dateTime;
 
     @Size(min = 2, max = 120)

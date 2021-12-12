@@ -17,6 +17,17 @@ function clearFilter() {
     $.get(mealAjaxUrl, updateTableByData);
 }
 
+function formatAndSet(key, value) {
+    if (key === 'dateTime') {
+        value = dateTimeFormat(value);
+    }
+    form.find("input[name='" + key + "']").val(value);
+}
+
+function dateTimeFormat(value) {
+    return value.replace(/T|:00$/g, ' ').trim();
+}
+
 $(function () {
     makeEditable(
         $("#datatable").DataTable({
@@ -31,7 +42,7 @@ $(function () {
                     "data": "dateTime",
                     "render": function (date, type, row) {
                         if (type === "display") {
-                            return date.replace(/T|:00$/g, ' ');
+                            return dateTimeFormat(date);
                         }
                         return date;
                     }

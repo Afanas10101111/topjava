@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.to.MealReceiveTo;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.web.ControllerUtil;
+import ru.javawebinar.topjava.util.ControllerUtil;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -46,15 +47,14 @@ public class MealUIController extends AbstractMealController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> createOrUpdate(@Valid MealTo mealTo, BindingResult result) {
+    public ResponseEntity<String> createOrUpdate(@Valid MealReceiveTo mrt, BindingResult result) {
         if (result.hasErrors()) {
             return ControllerUtil.getErrorResponseEntity(result);
         }
-        if (mealTo.isNew()) {
-            super.create(mealTo);
+        if (mrt.isNew()) {
+            super.create(mrt);
         } else {
-            super.update(mealTo, mealTo.id());
+            super.update(mrt, mrt.id());
         }
         return ResponseEntity.ok().build();
     }

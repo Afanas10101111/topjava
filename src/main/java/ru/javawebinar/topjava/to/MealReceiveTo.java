@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.to;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.beans.ConstructorProperties;
@@ -17,6 +18,7 @@ public class MealReceiveTo extends BaseTo {
     @DateTimeFormat(pattern = DATE_TIME_FORMAT_PATTERN_FOR_UI)
     private final LocalDateTime dateTime;
 
+    @NotBlank(message = EMPTY_FIELD_ERROR_MESSAGE)
     @Size(min = 2, max = 120)
     private final String description;
 

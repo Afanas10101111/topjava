@@ -24,6 +24,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_WITH_MEALS_MATCHER;
 import static ru.javawebinar.topjava.UserTestData.admin;
 import static ru.javawebinar.topjava.UserTestData.getNew;
 import static ru.javawebinar.topjava.UserTestData.getUpdated;
+import static ru.javawebinar.topjava.UserTestData.jsonWithPassword;
 import static ru.javawebinar.topjava.UserTestData.user;
 
 class AdminRestControllerTest extends AbstractControllerTest {

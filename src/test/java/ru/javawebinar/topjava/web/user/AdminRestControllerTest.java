@@ -121,6 +121,18 @@ class AdminRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void createInvalid() throws Exception {
+        User newUser = getNew();
+        newUser.setPassword("1");
+        checkOnValidationError(
+                perform(MockMvcRequestBuilders.post(REST_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(userHttpBasic(admin))
+                        .content(jsonWithPassword(newUser, newUser.getPassword())))
+        );
+    }
+
+    @Test
     void getAll() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_URL)
                 .with(userHttpBasic(admin)))

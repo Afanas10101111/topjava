@@ -77,6 +77,16 @@ class ProfileRestControllerTest extends AbstractControllerTest {
     }
 
     @Test
+    void updateInvalid() throws Exception {
+        UserTo updatedTo = new UserTo(null, "newName", "user@yandex.ru", "p", 1500);
+        checkOnValidationError(
+                perform(MockMvcRequestBuilders.put(REST_URL).contentType(MediaType.APPLICATION_JSON)
+                        .with(userHttpBasic(user))
+                        .content(JsonUtil.writeValue(updatedTo)))
+        );
+    }
+
+    @Test
     void getWithMeals() throws Exception {
         assumeDataJpa();
         perform(MockMvcRequestBuilders.get(REST_URL + "/with-meals")

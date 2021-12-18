@@ -18,7 +18,9 @@
             "error.app_error",
             "error.data_not_found",
             "error.data_error",
-            "error.validation_error"
+            "error.validation_error",
+            "error.email_exists",
+            "error.meal_duplicate_time"
     }%>'>
     i18n['${key}'] = '<spring:message code="${key}"/>';
     </c:forEach>

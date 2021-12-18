@@ -26,7 +26,9 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ExceptionInfoHandler {
-    private static Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
+    public static final String USERS_UNIQUE_EMAIL = "users_unique_email_idx";
+    public static final String MEALS_UNIQUE_TIME = "meals_unique_user_datetime_idx";
+    private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
 
     //  http://stackoverflow.com/a/22358422/548473
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -61,11 +63,17 @@ public class ExceptionInfoHandler {
     //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
     private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType) {
         Throwable rootCause = ValidationUtil.getRootCause(e);
+        String rootCauseMessage = rootCause.toString();
+        if (rootCauseMessage.contains(USERS_UNIQUE_EMAIL)) {
+            errorType = EMAIL_EXISTS;
+        } else if (rootCauseMessage.contains(MEALS_UNIQUE_TIME)) {
+            errorType = MEAL_DUPLICATE_TIME;
+        }
         if (logException) {
             log.error(errorType + " at request " + req.getRequestURL(), rootCause);
         } else {
-            log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
+            log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCauseMessage);
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, rootCause.toString());
+        return new ErrorInfo(req.getRequestURL(), errorType, rootCauseMessage);
     }
 }

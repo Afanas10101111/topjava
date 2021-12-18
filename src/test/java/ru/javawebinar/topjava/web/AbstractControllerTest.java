@@ -14,6 +14,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import ru.javawebinar.topjava.ActiveDbProfileResolver;
 import ru.javawebinar.topjava.Profiles;
+import ru.javawebinar.topjava.util.exception.ErrorType;
 
 import javax.annotation.PostConstruct;
 
@@ -21,6 +22,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.javawebinar.topjava.util.exception.ErrorType.VALIDATION_ERROR;
 
 
 @SpringJUnitWebConfig(locations = {
@@ -70,6 +72,13 @@ public abstract class AbstractControllerTest {
         resultActions
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.type").value("VALIDATION_ERROR"));
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
+    }
+
+    protected void checkOnDbConstraintError(ResultActions resultActions, ErrorType type) throws Exception {
+        resultActions
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.type").value(type.name()));
     }
 }

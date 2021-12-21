@@ -111,7 +111,7 @@ function failNoty(jqXHR) {
     var type = errorInfo.type.toLowerCase();
     failedNote = new Noty({
         text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;" + i18n["error." + type] + "<br>" +
-            (type === "email_exists" || type === "meal_duplicate_time" ? "" : errorInfo.detail.replace(/^[^:]+: /g, "")),
+            (type === "email_exists" || type === "meal_duplicate_time" ? "" : errorInfo.detail.replace(/;/g, "<br>")),
         type: "error",
         layout: "bottomRight"
     });

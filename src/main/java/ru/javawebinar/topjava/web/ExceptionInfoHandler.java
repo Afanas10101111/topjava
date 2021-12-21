@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,7 +22,12 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ru.javawebinar.topjava.util.exception.ErrorType.*;
+import static ru.javawebinar.topjava.util.exception.ErrorType.APP_ERROR;
+import static ru.javawebinar.topjava.util.exception.ErrorType.DATA_ERROR;
+import static ru.javawebinar.topjava.util.exception.ErrorType.DATA_NOT_FOUND;
+import static ru.javawebinar.topjava.util.exception.ErrorType.EMAIL_EXISTS;
+import static ru.javawebinar.topjava.util.exception.ErrorType.MEAL_DUPLICATE_TIME;
+import static ru.javawebinar.topjava.util.exception.ErrorType.VALIDATION_ERROR;
 
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
@@ -40,6 +46,13 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
+        Throwable rootCause = ValidationUtil.getRootCause(e);
+        String rootCauseMessage = rootCause.getMessage();
+        if (rootCauseMessage.contains(USERS_UNIQUE_EMAIL)) {
+            return logAndGetErrorInfo(req, e, true, EMAIL_EXISTS);
+        } else if (rootCauseMessage.contains(MEALS_UNIQUE_TIME)) {
+            return logAndGetErrorInfo(req, e, true, MEAL_DUPLICATE_TIME);
+        }
         return logAndGetErrorInfo(req, e, true, DATA_ERROR);
     }
 
@@ -54,6 +67,17 @@ public class ExceptionInfoHandler {
         return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR);
     }
 
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)  // 422
+    @ExceptionHandler(BindException.class)
+    public ErrorInfo bindExceptionError(HttpServletRequest req, BindException e) {
+        return logAndGetErrorInfo(
+                req,
+                new IllegalRequestDataException(ValidationUtil.getErrorMessage(e.getBindingResult())),
+                false,
+                VALIDATION_ERROR
+        );
+    }
+
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorInfo handleError(HttpServletRequest req, Exception e) {
@@ -63,17 +87,11 @@ public class ExceptionInfoHandler {
     //    https://stackoverflow.com/questions/538870/should-private-helper-methods-be-static-if-they-can-be-static
     private static ErrorInfo logAndGetErrorInfo(HttpServletRequest req, Exception e, boolean logException, ErrorType errorType) {
         Throwable rootCause = ValidationUtil.getRootCause(e);
-        String rootCauseMessage = rootCause.toString();
-        if (rootCauseMessage.contains(USERS_UNIQUE_EMAIL)) {
-            errorType = EMAIL_EXISTS;
-        } else if (rootCauseMessage.contains(MEALS_UNIQUE_TIME)) {
-            errorType = MEAL_DUPLICATE_TIME;
-        }
         if (logException) {
             log.error(errorType + " at request " + req.getRequestURL(), rootCause);
         } else {
-            log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCauseMessage);
+            log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        return new ErrorInfo(req.getRequestURL(), errorType, rootCauseMessage);
+        return new ErrorInfo(req.getRequestURL(), errorType, rootCause.getMessage());
     }
 }

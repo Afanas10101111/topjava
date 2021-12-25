@@ -18,6 +18,7 @@ import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.View;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.to.UserTo;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.net.URI;
 
@@ -27,13 +28,13 @@ public class ProfileRestController extends AbstractUserController {
     static final String REST_URL = "/rest/profile";
 
     @GetMapping
-    public User get(@AuthenticationPrincipal AuthorizedUser authUser) {
+    public User get(@AuthenticationPrincipal @ApiIgnore AuthorizedUser authUser) {
         return super.get(authUser.getId());
     }
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@AuthenticationPrincipal AuthorizedUser authUser) {
+    public void delete(@AuthenticationPrincipal @ApiIgnore AuthorizedUser authUser) {
         super.delete(authUser.getId());
     }
 
@@ -48,7 +49,7 @@ public class ProfileRestController extends AbstractUserController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@Validated(View.Web.class) @RequestBody UserTo userTo, @AuthenticationPrincipal AuthorizedUser authUser) {
+    public void update(@Validated(View.Web.class) @RequestBody UserTo userTo, @ApiIgnore @AuthenticationPrincipal AuthorizedUser authUser) {
         super.update(userTo, authUser.getId());
     }
 
@@ -58,7 +59,7 @@ public class ProfileRestController extends AbstractUserController {
     }
 
     @GetMapping("/with-meals")
-    public User getWithMeals(@AuthenticationPrincipal AuthorizedUser authUser) {
+    public User getWithMeals( @ApiIgnore @AuthenticationPrincipal AuthorizedUser authUser) {
         return super.getWithMeals(authUser.getId());
     }
 }
